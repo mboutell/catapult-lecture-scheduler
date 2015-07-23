@@ -57,7 +57,7 @@ class Schedule:
             
             for room in self.num_rooms:
                 prof = self.profs[random.randint(0, len(self.profs)-1)]
-                room[]
+#                 room[]
     
     def get_score(self):
         return self.score
