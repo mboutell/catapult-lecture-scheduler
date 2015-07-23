@@ -10,7 +10,7 @@ Algorithm:
    store number of conflicts, randomize based on that
    high randomization = randomizing days totally randomly
    low randomization = swapping out profs/groups with high conflicts or swapping between
-   
+   when the pq gets over some length (1000000?) take out half the elements, dump the pq, and load the elements back into the pq
    
 """
 
@@ -25,12 +25,14 @@ class Schedule:
         # can switch days, groups, and professors around
         # a score and comparisons necessary to sort them
         self.score = 0
-        self.num_days = 8
-        self.num_rooms = 5
+        self.num_days = 2
+        self.num_rooms = 4
         self.days = [ {} for i in range(self.num_days) ]
         
         self.profs = profs
         self.groups = groups
+        
+        self.max_groups_per_room = 2
     
     def score_schedule(self):
         # weighted probably
@@ -55,9 +57,39 @@ class Schedule:
         
         for day in self.days:
             
-            for room in self.num_rooms:
-                prof = self.profs[random.randint(0, len(self.profs)-1)]
-#                 room[]
+            scramble_list(self.profs)
+            scramble_list(self.groups)
+            
+            # putting a professor in each room
+            for room in range(self.num_rooms):
+                prof = self.profs[room]
+                day[prof] = []
+                
+            
+            exit_loop = False    
+            
+            
+            # DOESNT WORK
+            for room in list(day.values()):
+                
+                if exit_loop:
+                    break
+                
+                counter = 0
+                
+                # will flip between 0 and 1 (in the case that max_groups... == 2)
+                # this means it will add 2 groups in each of the above 'room' iterations
+                for i in range(self.max_groups_per_room):
+                    room.append(self.groups[counter])
+                    counter += 1
+                    if counter >= len(self.groups):
+                        exit_loop = True
+                        break
+            # DOESNT WORK
+            
+                
+                
+                
     
     def get_score(self):
         return self.score
@@ -76,6 +108,14 @@ class Schedule:
     
     def __eq__(self, other):
         return self.score == other.get_score()
+    
+    def __str__(self):
+        result = ""
+        
+        for day in self.days:
+            result += str(day) + "\n"
+            
+        return result
     
     def copy(self):
         pass
@@ -110,16 +150,36 @@ def swap_elements(el1, el2, ls):
     ls[el1] = ls[el2]
     ls[el2] = cp
     
-def scramble_list(self, ls):
-        
+def scramble_list(ls):
     for x in range(len(ls)):
         num = random.randint(x, len(ls)-1)
         swap_elements(x, num, ls)
+        
+
         
         
 # maybe have a room
         
         
+testProf1 = Professor()
+testProf2 = Professor()
+testProf3 = Professor()
+testProf4 = Professor()
+
+
+testGroup1 = Group(5, "Boutell")
+testGroup2 = Group(9, "Coleman")
+testGroup3 = Group(18, "Aidoo")
+testGroup4 = Group(10, "Rupakheti")
+testGroup5 = Group(1, "DeVasher")
+testGroup6 = Group(73, "Song")
+
+testProfs = [testProf1, testProf2, testProf3, testProf4]
+testGroups = [testGroup1, testGroup2, testGroup3, testGroup4, testGroup5, testGroup6]
+
+test = Schedule(testProfs, testGroups)
+test.generate_random_schedule()
+print(test)
         
         
         
