@@ -16,7 +16,7 @@ Algorithm:
 
 
 
-import random
+import random, sys
 from heapq import *
 from math import ceil, floor
 
@@ -27,8 +27,8 @@ class Schedule:
         # a score and comparisons necessary to sort them
         
         self.score = 0
-        self.num_days = 2
-        self.num_rooms = 3
+        self.num_days = 8
+        self.num_rooms = 5
         
         self.days = [ {} for i in range(self.num_days) ]
         
@@ -97,9 +97,9 @@ class Schedule:
                     crowded_class_score += int( (( num_in_room - self.max_num_students_in_room ) ** 2) * multiplier )
                     
                     
-        print("Repeat score:", prof_repeat_score)
-        print("Lecture number score:", num_lectures_score)
-        print("Crowded class score:", crowded_class_score)
+#         print("Repeat score:", prof_repeat_score)
+#         print("Lecture number score:", num_lectures_score)
+#         print("Crowded class score:", crowded_class_score)
                     
         self.score = prof_repeat_score + num_lectures_score + crowded_class_score
                     
@@ -177,7 +177,32 @@ class Schedule:
         return result
     
     def copy(self):
-        pass
+        
+        cp = Schedule(self.professors, self.groups)
+        
+        counter = 0
+        for day in self.days:
+            for prof, group_list in day.items():
+                for group in group_list:
+                    cp.days[counter][prof].append(group)
+                
+            counter += 1
+            
+        cp.score_schedule()
+        
+        return cp
+                
+#         self.score = 0
+#         self.num_days = 2
+#         self.num_rooms = 3
+#         
+#         self.days = [ {} for i in range(self.num_days) ]
+#         
+#         self.professors = profs
+#         self.groups = groups
+#         
+#         self.max_groups_per_room = len(self.groups)//self.num_rooms
+#         self.max_num_students_in_room = 30
     
 class Group:
     def __init__( self, num_students, prof_name , all_profs):
@@ -245,25 +270,32 @@ def scramble_list(ls):
 # maybe have a room
         
         
-testProf1 = Professor("Boutell")
-testProf2 = Professor("Aidoo")
-testProf3 = Professor("Song")
-testProf4 = Professor("DeVasher")
-
-testProfs = [testProf1, testProf2, testProf3, testProf4]
-
-
-testGroup1 = Group(13, "Boutell", testProfs)
-testGroup2 = Group(18, "Coleman", testProfs)
-testGroup3 = Group(16, "Aidoo", testProfs)
-testGroup4 = Group(15, "Rupakheti", testProfs)
-testGroup5 = Group(17, "DeVasher", testProfs)
-testGroup6 = Group(16, "Song", testProfs)
-
-testGroups = [testGroup1, testGroup2, testGroup3, testGroup4, testGroup5, testGroup6]
-
-test = Schedule(testProfs, testGroups)
-test.generate_random_schedule()
-print(test)
+if __name__ == "__main__":
+    
+    testProf1 = Professor("Boutell")
+    testProf2 = Professor("Aidoo")
+    testProf3 = Professor("Song")
+    testProf4 = Professor("DeVasher")
+    testProf5 = Professor("Rupakheti")
+    testProf6 = Professor("Coleman")
+    testProf7 = Professor("Steve")
+    testProf8 = Professor("John Doe")
+    testProf9 = Professor("Jane Doe")
+    
+    testProfs = [testProf1, testProf2, testProf3, testProf4, testProf5, testProf6, testProf7, testProf8, testProf9]
+    
+    
+    testGroup1 = Group(13, "Boutell", testProfs)
+    testGroup2 = Group(18, "Coleman", testProfs)
+    testGroup3 = Group(16, "Aidoo", testProfs)
+    testGroup4 = Group(15, "Rupakheti", testProfs)
+    testGroup5 = Group(17, "DeVasher", testProfs)
+    testGroup6 = Group(16, "Song", testProfs)
+    
+    testGroups = [testGroup1, testGroup2, testGroup3, testGroup4, testGroup5, testGroup6]
+    
+    test = Schedule(testProfs, testGroups)
+    test.generate_random_schedule()
+    print(test)
 
         
