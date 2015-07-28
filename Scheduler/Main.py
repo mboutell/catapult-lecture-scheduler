@@ -15,15 +15,16 @@ Algorithm:
 """
 
 from Scheduler import *
+from heapq import *
 import time
 
 class Algorithm:
     
     def __init__(self):
         
-        self.starting_number = 10000
+        self.starting_number = 1000000
         self.num_to_generate_on_randomization = 10
-        self.max_pq_size = 5000
+        self.max_pq_size = 500000
         
         self.pq = []
         
@@ -51,6 +52,28 @@ class Algorithm:
         
         testGroups = [testGroup1, testGroup2, testGroup3, testGroup4, testGroup5, testGroup6]
         
+        pq_score_limit = 75
+        
+        sched = Schedule(testProfs, testGroups)
+        
+        for x in range(10000):
+            
+            sched = sched.copy()
+            sched.generate_random_schedule()
+            sched.score_schedule()
+            
+            if sched.get_score() > 2000:
+                print(sched)
+            
+            if sched.get_score() < pq_score_limit:
+                heappush(self.pq, sched)
+                
+                
+        print("Num under {:d}: {:d}".format(pq_score_limit, len(self.pq)))
+            
+            
+        
+        """
         start = time.time()
         num_to_generate = self.starting_number
         for i in range(num_to_generate):
@@ -58,9 +81,8 @@ class Algorithm:
             schedule.generate_random_schedule()
             heappush(self.pq, schedule)
         print( "Time to add {:d} to pq: {:.2f} seconds".format(num_to_generate, time.time() - start) )
-            
-            
-            
+       
+        
         start = time.time()
         temp = []
         while len(self.pq) > self.max_pq_size:
@@ -68,6 +90,30 @@ class Algorithm:
         heapify(temp)
         self.pq = temp
         print( "Time to remove from pq: {:.2f} seconds".format( time.time() - start) )
+         
+        start = time.time()
+        temp = []
+        num_to_generate = self.starting_number
+        for i in range(num_to_generate):
+            schedule = Schedule(testProfs, testGroups)
+            temp.append(schedule)
+        print( "Time to create and score {:d} schedules: {:.2f} seconds".format(num_to_generate, time.time() - start) )
+        
+        start = time.time()
+        num_to_generate = self.starting_number
+        for i in temp:
+            i.score_schedule()
+        print( "Time to score {:d} schedules: {:.2f} seconds".format(num_to_generate, time.time() - start) )
+        """
+        
+        
+        best = []
+        sched = Schedule(testProfs, testGroups)
+        
+            
+            
+            
+        
 
             
             
