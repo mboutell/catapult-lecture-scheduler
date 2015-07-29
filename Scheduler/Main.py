@@ -16,106 +16,148 @@ Algorithm:
 
 from Scheduler import *
 from heapq import *
-import time
+import time, threading
 
 class Algorithm:
     
     def __init__(self):
         
-        self.starting_number = 1000000
-        self.num_to_generate_on_randomization = 10
-        self.max_pq_size = 500000
+        self.num_days = 8
+        self.num_rooms = 5
+        self.max_students_per_room = 30
         
-        self.pq = []
+        # creating professors
+        prof1 = Professor("Boutell")
+        prof2 = Professor("Aidoo")
+        prof3 = Professor("Song")
+        prof4 = Professor("DeVasher")
+        prof5 = Professor("Rupakheti")
+        prof6 = Professor("Coleman")
+        prof7 = Professor("Steve")
+        prof8 = Professor("Copinger")
+        prof9 = Professor("Jane Doe")
+        
+        self.profs = [prof1, prof2, prof3, prof4, prof5, prof6, prof7, prof8, prof9]
+        
+        # creating groups
+        group1 = Group(13, "Boutell", self.profs)
+        group2 = Group(18, "Coleman", self.profs)
+        group3 = Group(16, "Aidoo", self.profs)
+        group4 = Group(15, "Rupakheti", self.profs)
+        group5 = Group(17, "DeVasher", self.profs)
+        group6 = Group(16, "Song", self.profs)
+        
+        self.groups = [group1, group2, group3, group4, group5, group6]
+        
+        # for use in generating the base
+        self.num_threads = 1
+        self.base_list = []
+        self.base_num_to_generate = 1000
+        self.base_num_lecture_score_limit = 0
+        self.base_repeat_lecture_limit = 50
+        
+        # Processing in the second "phase"
+        self.batch_size = 100
+        self.iterations = 1000
+        self.max_base_list_size = 10000
+        
+        
+        
+        
+        
         
     def run(self):
         
-        testProf1 = Professor("Boutell")
-        testProf2 = Professor("Aidoo")
-        testProf3 = Professor("Song")
-        testProf4 = Professor("DeVasher")
-        testProf5 = Professor("Rupakheti")
-        testProf6 = Professor("Coleman")
-        testProf7 = Professor("Steve")
-        testProf8 = Professor("Copinger")
-        testProf9 = Professor("Jane Doe")
+        # turns out python uses something called a global interpreter lock meaning only
+        # one thread can be executed at any given time. As a result trying to multithread 
+        # it actually significantly slows it down.
         
-        testProfs = [testProf1, testProf2, testProf3, testProf4, testProf5, testProf6, testProf7, testProf8, testProf9]
+        start_time = time.time()
         
         
-        testGroup1 = Group(13, "Boutell", testProfs)
-        testGroup2 = Group(18, "Coleman", testProfs)
-        testGroup3 = Group(16, "Aidoo", testProfs)
-        testGroup4 = Group(15, "Rupakheti", testProfs)
-        testGroup5 = Group(17, "DeVasher", testProfs)
-        testGroup6 = Group(16, "Song", testProfs)
         
-        testGroups = [testGroup1, testGroup2, testGroup3, testGroup4, testGroup5, testGroup6]
+        self.generate_base()
+        heapify(self.base_list)
         
-        pq_score_limit = 75
+        print("Base created in {:.2f} seconds.".format(time.time()-start_time))
+            
+        # should now only switch around who is already in there
+        self.shuffle_base()
         
-        sched = Schedule(testProfs, testGroups)
+        # just to glance at the results
+        print(len(self.base_list))
         
-        for x in range(10000):
+        for i in range(10):
+            print(heappop(self.base_list))
+                        
+            
+            
+            
+        time_taken = time.time() - start_time
+        print("Complete.\nRun time: {:.2f} seconds".format(time_taken))
+        
+        
+    def shuffle_base(self):
+        
+        for unused_var in range(self.iterations):
+            
+            if unused_var % 100 == 0:
+                print( "Iteration: {:d}".format(unused_var) )
+                print( "Size of base: {:d}".format(len(self.base_list)) )
+            
+            if len(self.base_list) > self.max_base_list_size:
+                print("Shrinking base list...")
+                temp = []
+                for i in range(self.max_base_list_size//2):
+                    temp.append( heappop(self.base_list) )
+                    
+                self.base_list = []
+                while len(temp) > 0:
+                    heappush( self.base_list, temp.pop() )
+                print("Done.")
+            
+            batch = []
+            to_put_back = []
+            
+            for i in range(self.batch_size):
+                batch.append( heappop(self.base_list) )
+                
+            for sched in batch:
+                
+                to_put_back.append(sched)
+                
+                for day_num in range(self.num_days):
+                    alternate = sched.copy()
+                    alternate.randomize_groups_day( day_num )
+                    alternate.score_schedule()
+                    
+                    if alternate < sched:
+                        to_put_back.append( alternate )
+                        
+            for sched in to_put_back:
+                heappush(self.base_list, sched)
+        
+        
+    def generate_base(self):
+        
+        sched = Schedule( self.profs, self.groups, self.num_days, self.num_rooms, self.max_students_per_room )
+        
+        for unused_var in range( self.base_num_to_generate//self.num_threads ):
             
             sched = sched.copy()
             sched.generate_random_schedule()
-            sched.score_schedule()
             
-            if sched.get_score() > 2000:
-                print(sched)
             
-            if sched.get_score() < pq_score_limit:
-                heappush(self.pq, sched)
+            while sched.score_num_of_prof_lectures() > self.base_num_lecture_score_limit:
+                sched.randomize_all_professors()
                 
+            
+            while sched.score_repeat_lectures() > self.base_repeat_lecture_limit:
+                sched.randomize_all_groups()
                 
-        print("Num under {:d}: {:d}".format(pq_score_limit, len(self.pq)))
-            
-            
-        
-        """
-        start = time.time()
-        num_to_generate = self.starting_number
-        for i in range(num_to_generate):
-            schedule = Schedule(testProfs, testGroups)
-            schedule.generate_random_schedule()
-            heappush(self.pq, schedule)
-        print( "Time to add {:d} to pq: {:.2f} seconds".format(num_to_generate, time.time() - start) )
-       
-        
-        start = time.time()
-        temp = []
-        while len(self.pq) > self.max_pq_size:
-            temp.append(heappop(self.pq))
-        heapify(temp)
-        self.pq = temp
-        print( "Time to remove from pq: {:.2f} seconds".format( time.time() - start) )
-         
-        start = time.time()
-        temp = []
-        num_to_generate = self.starting_number
-        for i in range(num_to_generate):
-            schedule = Schedule(testProfs, testGroups)
-            temp.append(schedule)
-        print( "Time to create and score {:d} schedules: {:.2f} seconds".format(num_to_generate, time.time() - start) )
-        
-        start = time.time()
-        num_to_generate = self.starting_number
-        for i in temp:
-            i.score_schedule()
-        print( "Time to score {:d} schedules: {:.2f} seconds".format(num_to_generate, time.time() - start) )
-        """
-        
-        
-        best = []
-        sched = Schedule(testProfs, testGroups)
-        
-            
-            
-            
-        
 
-            
+            sched.score_schedule()
+            self.base_list.append(sched)
             
             
             

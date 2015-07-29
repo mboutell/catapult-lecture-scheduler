@@ -20,22 +20,31 @@ import random, sys
 from math import ceil, floor
 
 class Schedule:
-    def __init__(self, profs, groups):
+    
+    def __init__(self, profs, groups, num_days, num_rooms, students_per_room):
         # list of days containing a group professor pair
         # can switch days, groups, and professors around
         # a score and comparisons necessary to sort them
         
         self.score = 0
-        self.num_days = 8
-        self.num_rooms = 5
-        self.max_num_students_in_room = 30
+        self.num_days = num_days
+        self.num_rooms = num_rooms
+        self.max_num_students_in_room = students_per_room
         
         self.professors = profs
         self.groups = groups
         
+        self.get_prof_by_name = {}
+        
+        for prof in self.professors:
+            self.get_prof_by_name[ prof.get_name() ] = prof
+        
         self.days = [ {} for i in range(self.num_days) ]
         
         self.max_groups_per_room = ceil(len(self.groups)/self.num_rooms)
+        
+        self.avg_lectures_given = self.num_rooms * self.num_days / len(self.professors)
+        self.ideal_lectures_given = floor( self.avg_lectures_given ), ceil( self.avg_lectures_given )
         
         
     # scoring methods
@@ -62,22 +71,24 @@ class Schedule:
         
         self.score_repeat_lectures()
                 
-                
-        num_lectures_score = 0
-        multiplier = 1
+        self.score_num_of_prof_lectures()
         
-        avg_lectures_given = self.num_rooms * self.num_days / len(self.professors)
-        ideal_lectures_given = floor(avg_lectures_given), ceil(avg_lectures_given)
+        self.score_crowded_classroom()
+        
+                    
+        if self.repeat_lecture_score > 1000:
+            print("Prof repeat")
+            
+        if self.num_lectures_score > 1000:
+            print("num lectures")
+            
+        if self.crowded_class_score > 1000:
+            print("Crowded class")
+                    
+        self.score = self.repeat_lecture_score + self.num_lectures_score + self.crowded_class_score
                
-        for prof in self.professors:
-            
-            num = prof.get_days_lectured()
-            
-            if not num == ideal_lectures_given[0] and not num == ideal_lectures_given[1]:
-                num_lectures_score += int( (( num - avg_lectures_given ) ** 2) * multiplier )
-        
-        
-        
+               
+    def score_crowded_classroom(self):
         crowded_class_score = 0
         multiplier = 0.2
         
@@ -86,31 +97,18 @@ class Schedule:
                 
                 num_in_room = 0
                 
-                counter = 0
-                
                 for group in room:
                     num_in_room += group.get_num_students()
-                    counter += 1
                     if num_in_room > 35:
-                        print("HMMMM... {:d}".format(num_in_room))
+                        print("Far too many in a room")
+                        sys.exit()
                         
-#                 print("Done with room. Groups in it: {:d}".format(counter))
                     
                 if num_in_room > self.max_num_students_in_room:
                     crowded_class_score += int( (( num_in_room - self.max_num_students_in_room ) ** 2) * multiplier )
                     
-                    
-        if self.repeat_lecture_score > 1000:
-            print("Prof repeat")
-            
-        if num_lectures_score > 1000:
-            print("num lectures")
-            
-        if crowded_class_score > 1000:
-            print("Crowded class")
-                    
-        self.score = self.repeat_lecture_score + num_lectures_score + crowded_class_score
-                    
+        self.crowded_class_score = crowded_class_score
+        return self.crowded_class_score
         
     def score_repeat_lectures(self):
         
@@ -133,7 +131,30 @@ class Schedule:
                 
         self.repeat_lecture_score = prof_repeat_score
         
-                    
+        return self.repeat_lecture_score
+    
+    def score_num_of_prof_lectures(self):
+        
+        for prof in self.professors:
+            prof.reset_lectures()
+        
+        for day in self.days:
+            for prof_name in day.keys():
+                self.get_prof_by_name[ prof_name ].give_lecture()
+                
+                
+        multiplier = 1
+        num_lectures_score = 0
+                
+        for prof in self.professors:
+            
+            num = prof.get_days_lectured()
+            
+            if not num == self.ideal_lectures_given[0] and not num == self.ideal_lectures_given[1]:
+                num_lectures_score += int( (( num - self.avg_lectures_given ) ** 2) * multiplier )
+                
+        self.num_lectures_score = num_lectures_score
+        return self.num_lectures_score
         
     
                     
@@ -154,7 +175,62 @@ class Schedule:
     def switch_in_professor(self, day, old_prof, new_prof):
         cp = day.pop(old_prof)
         day[new_prof] = cp
+        
+    def randomize_professors_day(self, day_number):
+        
+        day = self.days[day_number]
+        
+        groups_for_day = []
+        profs_for_day = []
+        iter_ls = list(day.keys())
+        
+        for prof_name in iter_ls:
+            groups_for_day.append( day.pop(prof_name) )
+            profs_for_day.append( prof_name )
+            
+        scramble_list( profs_for_day )
+        
+        for i in range(len(profs_for_day)):
+            
+            day[ profs_for_day[i] ] = groups_for_day[i]
     
+    def randomize_groups_day(self, day_number):
+        
+        day = self.days[day_number]
+        
+        groups_for_day = []
+        profs_for_day = []
+        iter_ls = list(day.keys())
+        
+        for prof_name in iter_ls:
+            
+            groups = day.pop( prof_name )
+            for group in groups:
+                groups_for_day.append(group)
+            
+            profs_for_day.append( prof_name )
+            
+            day[prof_name] = []
+            
+        
+        scramble_list( groups_for_day )
+        
+        done = False
+        counter = 0
+        for unused_var in range(self.max_groups_per_room):
+            
+            if done:
+                break
+            
+            for room in day.values():
+                
+                room.append( groups_for_day[counter] )
+                counter += 1
+                
+                if counter >= len(groups_for_day):
+                    done = True
+                    break
+        
     def randomize_all_professors(self):
         """
         changes all days
@@ -163,14 +239,15 @@ class Schedule:
         for day in self.days:
             
             prof_groups = []
+            iter_ls = list(day.keys())
             
-            for prof in day.keys():
+            for prof in iter_ls:
                 prof_groups.append(day.pop(prof))
             
             scramble_list(self.professors)
             
-            for i in range(len(self.num_rooms)):
-                day[self.professors[i]] = prof_groups[i]
+            for i in range(self.num_rooms):
+                day[ self.professors[i].get_name() ] = prof_groups[i]
             
     def randomize_all_groups(self):
         """
@@ -190,7 +267,7 @@ class Schedule:
             # re adding the groups
             done = False
             counter = 0            
-            for unused in range(self.max_groups_per_room):
+            for unused_var in range(self.max_groups_per_room):
                 
                 if done:
                     break
@@ -283,6 +360,9 @@ class Schedule:
     # end magic methods
     
     def copy(self):
+        """
+        Returns an unscored copy. Copies down to the groups and professors
+        """
         
         # copying profs and groups to avoid pointer troubles
         profs_copy = []
@@ -300,7 +380,7 @@ class Schedule:
             groups_copy.append( cp )
             getting_group_by_name[ group.get_name() ] = cp
         
-        cp = Schedule( profs_copy, groups_copy )
+        cp = Schedule( profs_copy, groups_copy, self.num_days, self.num_rooms, self.max_num_students_in_room )
         
         
         for day_number in range(len(self.days)):
@@ -379,6 +459,9 @@ class Professor:
     def ungive_lecture(self):
         self.num_days_lectured -= 1
         
+    def reset_lectures(self):
+        self.num_days_lectured = 0
+        
     def get_days_lectured(self):
         return self.num_days_lectured
         
@@ -438,16 +521,11 @@ if __name__ == "__main__":
     test = Schedule(testProfs, testGroups)
     test.generate_random_schedule()
     
-    test_cp = test.copy()
+    print(test)
     
-    test.score_repeat_lectures()
-    test_cp.score_repeat_lectures()
-    
-    print(test.repeat_lecture_score)
-    print(test_cp.repeat_lecture_score)
+    test.randomize_professors_day(2)
     
     print(test)
-    print(test_cp)
     
 
 
