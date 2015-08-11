@@ -27,39 +27,39 @@ class Algorithm:
         self.max_students_per_room = 30
         
         # creating professors
-        prof1 = Professor("Boutell")
-        prof2 = Professor("Aidoo")
-        prof3 = Professor("Song")
-        prof4 = Professor("DeVasher")
-        prof5 = Professor("Rupakheti")
-        prof6 = Professor("Coleman")
-        prof7 = Professor("Steve")
-        prof8 = Professor("Copinger")
-        prof9 = Professor("Jane Doe")
+        prof1 = Professor("Boutell",   [True, False, True, True, True, True, True, True]  )
+        prof2 = Professor("Aidoo",     [False, False, True, True, True, True, True, True] )
+        prof3 = Professor("Song",      [True, True, False, True, True, True, True, True]  )
+        prof4 = Professor("DeVasher",  [True, True, True, True, True, False, True, True]  )
+        prof5 = Professor("Rupakheti", [True, True, True, True, False, True, True, True]  )
+        prof6 = Professor("Coleman",   [True, True, True, True, True, True, False, False] )
+        prof7 = Professor("Steve",     [True, False, True, True, True, True, True, True]  )
+        prof8 = Professor("Copinger",  [True, True, True, True, False, True, True, True]  )
+        prof9 = Professor("Jane Doe",  [True, True, True, False, True, True, True, True]  )
         
         self.profs = [prof1, prof2, prof3, prof4, prof5, prof6, prof7, prof8, prof9]
         
         # creating groups
-        group1 = Group(13, "Boutell", self.profs)
-        group2 = Group(18, "Coleman", self.profs)
-        group3 = Group(16, "Aidoo", self.profs)
-        group4 = Group(15, "Rupakheti", self.profs)
-        group5 = Group(17, "DeVasher", self.profs)
-        group6 = Group(16, "Song", self.profs)
+        group1 = Group(13, "Boutell", self.profs,    [True, True, False, True, True, True, True, True]  )
+        group2 = Group(18, "Coleman", self.profs,    [True, True, True, False, True, True, True, True]  )
+        group3 = Group(16, "Aidoo", self.profs,      [True, True, True, True, False, True, True, True]  )
+        group4 = Group(15, "Rupakheti", self.profs,  [True, True, True, True, True, False, True, True]  )
+        group5 = Group(17, "DeVasher", self.profs,   [True, True, False, True, True, True, False, True] )
+        group6 = Group(16, "Song", self.profs,       [True, True, True, True, True, True, True, False]  )
         
         self.groups = [group1, group2, group3, group4, group5, group6]
         
         # for use in generating the base
         self.num_threads = 1
         self.base_list = []
-        self.base_num_to_generate = 1000
+        self.base_num_to_generate = 100
         self.base_num_lecture_score_limit = 0
         self.base_repeat_lecture_limit = 50
         
         # Processing in the second "phase"
         self.batch_size = 100
-        self.iterations = 1000
-        self.max_base_list_size = 10000
+        self.iterations = 10000
+        self.max_base_list_size = 200
         
         
         
@@ -88,7 +88,16 @@ class Algorithm:
         print(len(self.base_list))
         
         for i in range(10):
-            print(heappop(self.base_list))
+            to_optimize = []
+            to_optimize.append(heappop(self.base_list))
+            print(to_optimize[len(to_optimize)-1])
+            
+        for sched in to_optimize:
+            sched.eliminate_repeat_lectures()
+            sched.score_schedule()
+            
+        for sched in to_optimize:
+            print(sched)
                         
             
             
@@ -134,6 +143,14 @@ class Algorithm:
                     if alternate < sched:
                         to_put_back.append( alternate )
                         
+                # this will be more useful when schedule conflicts are added
+                alternate = sched.copy()
+                alternate.scramble_days()
+                alternate.score_schedule()
+                
+                if alternate < sched:
+                    to_put_back.append( alternate )
+                        
             for sched in to_put_back:
                 heappush(self.base_list, sched)
         
@@ -141,6 +158,7 @@ class Algorithm:
     def generate_base(self):
         
         sched = Schedule( self.profs, self.groups, self.num_days, self.num_rooms, self.max_students_per_room )
+        i = 0
         
         for unused_var in range( self.base_num_to_generate//self.num_threads ):
             
@@ -158,6 +176,10 @@ class Algorithm:
 
             sched.score_schedule()
             self.base_list.append(sched)
+            
+            if len(self.base_list) >= 100 * i:
+                i += 1
+                print(len(self.base_list))
             
             
             

@@ -75,6 +75,9 @@ class Schedule:
         
         self.score_crowded_classroom()
         
+        self.score_professor_conflicts()
+        
+        
                     
         if self.repeat_lecture_score > 1000:
             print("Prof repeat")
@@ -85,7 +88,8 @@ class Schedule:
         if self.crowded_class_score > 1000:
             print("Crowded class")
                     
-        self.score = self.repeat_lecture_score + self.num_lectures_score + self.crowded_class_score
+        self.score = self.repeat_lecture_score + self.num_lectures_score + self.crowded_class_score \
+                    + self.prof_conflict_score
                
                
     def score_crowded_classroom(self):
@@ -109,6 +113,54 @@ class Schedule:
                     
         self.crowded_class_score = crowded_class_score
         return self.crowded_class_score
+    
+    def score_professor_conflicts(self):
+        """
+        
+        Look in to how best to score this. These are pretty hard bounds
+        
+        """
+        prof_conflict_score = 0
+        multiplier = 4
+        
+        for day_num in range(self.num_days):
+            
+            current_day = self.days[ day_num ]
+            num_conflicts = 0
+            
+            for prof_name in current_day.keys():
+                if not self.get_prof_by_name[prof_name].available( day_num ):
+                    num_conflicts += 1
+                    
+            prof_conflict_score += multiplier * ( num_conflicts ** 2 )
+            
+        self.prof_conflict_score = prof_conflict_score
+        return self.prof_conflict_score
+            
+    
+    def score_group_conflicts(self):
+        """
+        
+        Look in to how best to score this. These are pretty hard bounds
+        
+        """
+        group_conflict_score = 0
+        multiplier = 4
+        
+        for day_num in range(self.num_days):
+            
+            current_day = self.days[ day_num ]
+            num_conflicts = 0
+            
+            for groups in current_day.values():
+                for group in groups:
+                    if not group.available( day_num ):
+                        num_conflicts += 1
+                    
+            group_conflict_score += multiplier * ( num_conflicts ** 2 )
+            
+        self.group_conflict_score = group_conflict_score
+        return self.group_conflict_score
         
     def score_repeat_lectures(self):
         
@@ -122,7 +174,7 @@ class Schedule:
                     group.watch_lecture(prof_name)
                     
         prof_repeat_score = 0
-        multiplier = 2
+        multiplier = 15
         
         for group in self.groups:
             for prof in self.professors:
@@ -155,6 +207,9 @@ class Schedule:
                 
         self.num_lectures_score = num_lectures_score
         return self.num_lectures_score
+    
+    def find_repeat_lectures(self):
+        pass
         
     
                     
@@ -172,9 +227,42 @@ class Schedule:
         day[prof1] = day[prof2]
         day[prof2] = cp
     
-    def switch_in_professor(self, day, old_prof, new_prof):
-        cp = day.pop(old_prof)
-        day[new_prof] = cp
+    def switch_in_professor(self, day, old_prof_name, new_prof_name):
+        cp = day.pop(old_prof_name)
+        day[new_prof_name] = cp
+        
+    def eliminate_repeat_lectures(self):
+        
+        for day_num in range(len(self.days)):
+            
+            day = self.days[day_num]
+            
+            for prof_name, group_list in day.items():
+                for group in group_list:
+                    
+                    if group.times_seen_professor(prof_name) > 1:
+                        
+                        score = self.score_repeat_lectures()
+                        
+                        counter = 0
+                        while self.score_repeat_lectures() >= score:
+                            counter += 1
+                            prof_name = self.replace_prof_with_random(day_num, prof_name)
+                            if counter >= 100:
+                                break
+                
+        
+    def replace_prof_with_random(self, day_num, prof_name):
+        num = random.randint(0, len(self.professors)-1)
+        day = self.days[day_num]
+        
+        # get a faster way to do this if it works
+        while self.professors[num].get_name() in day:
+            num = random.randint(0, len(self.professors)-1)
+        
+        self.switch_in_professor(day, prof_name, self.professors[num].get_name())
+        return self.professors[num].get_name()
+        
         
     def randomize_professors_day(self, day_number):
         
@@ -249,6 +337,9 @@ class Schedule:
             for i in range(self.num_rooms):
                 day[ self.professors[i].get_name() ] = prof_groups[i]
             
+    def scramble_days(self):
+        scramble_list(self.days)
+            
     def randomize_all_groups(self):
         """
         changes all days
@@ -288,7 +379,8 @@ class Schedule:
         self.days = [ {} for i in range(self.num_days) ]
         
         # we want to scramble all the days
-        for day in self.days:
+        for day_num in range(len(self.days)):
+            day = self.days[day_num]
             
             scramble_list(self.professors)
             scramble_list(self.groups)
@@ -310,8 +402,10 @@ class Schedule:
                     break
                 
                 for prof_name, room in day.items():
-                    room.append(self.groups[counter])
-                    self.groups[counter].watch_lecture( prof_name )
+                    
+                    if self.groups[counter].available(day_num):
+                        room.append(self.groups[counter])
+                        self.groups[counter].watch_lecture( prof_name )
                     
                     counter += 1
                     
@@ -319,7 +413,6 @@ class Schedule:
                         exit_loop = True
                         break
                     
-#         self.score_schedule()
             
     # end randomization methods
                 
@@ -348,7 +441,9 @@ class Schedule:
         return self.score == other.get_score()
     
     def __str__(self):
-        result = "Schedule:\nScore: {:d}\n".format(self.score)
+        result = ("Schedule:\nScore: {:d}   Rpt Lecture Score: {:d}   Num prof lecture score: {:d}   Crowded class score: {:d}"\
+                    + "   Prof Conflict Score: {:d}\n" ) \
+                    .format(self.score, self.repeat_lecture_score, self.num_lectures_score, self.crowded_class_score, self.prof_conflict_score)
         
         counter = 1
         for day in self.days:
@@ -400,13 +495,14 @@ class Schedule:
                 
     
 class Group:
-    def __init__( self, num_students, prof_name , all_profs):
+    def __init__( self, num_students, prof_name , all_profs, days_available):
         # has a number of students
         # constraints on days
         # what professors they have seen
         self.num_students = num_students
         self.prof_name = prof_name
         self.times_seen_profs = {}
+        self.days_available = days_available
         
         self.all_profs = all_profs # right now just so it is easy to copy
         
@@ -421,6 +517,9 @@ class Group:
     def get_name(self):
         return self.prof_name
     
+    def available(self, day_num):
+        return self.days_available[day_num]
+    
     def watch_lecture(self, prof_name):
         self.times_seen_profs[prof_name] += 1
         
@@ -432,7 +531,7 @@ class Group:
             self.times_seen_profs[ prof.get_name() ] = 0
     
     def copy(self):
-        return Group( self.num_students, self.prof_name, self.all_profs )
+        return Group( self.num_students, self.prof_name, self.all_profs, self.days_available )
     
     def __str__(self):
         return self.prof_name + ": " + str(self.num_students)
@@ -444,11 +543,13 @@ class Group:
     
     
 class Professor:
-    def __init__(self, name):
+    def __init__(self, name, days_available):
         # has constraints on days
         # number of days they have lectured
         self.num_days_lectured = 0
         self.name = name
+        self.days_available = days_available
+
         
     def get_name(self):
         return self.name
@@ -464,9 +565,12 @@ class Professor:
         
     def get_days_lectured(self):
         return self.num_days_lectured
+    
+    def available(self, day_num):
+        return self.days_available[day_num]
         
     def copy(self):
-        return Professor(self.name)
+        return Professor(self.name, self.days_available)
         
     def __str__(self):
         return "Professor: " + self.name
@@ -483,9 +587,12 @@ def swap_elements(el1, el2, ls):
     ls[el2] = cp
     
 def scramble_list(ls):
-    for x in range(len(ls)):
-        num = random.randint(x, len(ls)-1)
-        swap_elements(x, num, ls)
+    
+    random.shuffle(ls)
+    
+#     for x in range(len(ls)):
+#         num = random.randint(x, len(ls)-1)
+#         swap_elements(x, num, ls)
         
 
         
@@ -495,35 +602,41 @@ def scramble_list(ls):
         
 if __name__ == "__main__":
     
-    testProf1 = Professor("Boutell")
-    testProf2 = Professor("Aidoo")
-    testProf3 = Professor("Song")
-    testProf4 = Professor("DeVasher")
-    testProf5 = Professor("Rupakheti")
-    testProf6 = Professor("Coleman")
-    testProf7 = Professor("Steve")
-    testProf8 = Professor("John Doe")
-    testProf9 = Professor("Jane Doe")
+    prof1 = Professor("Boutell",   [True, False, True, True, True, True, True, True]  )
+    prof2 = Professor("Aidoo",     [False, False, True, True, True, True, True, True] )
+    prof3 = Professor("Song",      [True, True, False, True, True, True, True, True]  )
+    prof4 = Professor("DeVasher",  [True, True, True, True, True, False, True, True]  )
+    prof5 = Professor("Rupakheti", [True, True, True, True, False, True, True, True]  )
+    prof6 = Professor("Coleman",   [True, True, True, True, True, True, False, False] )
+    prof7 = Professor("Steve",     [True, False, True, True, True, True, True, True]  )
+    prof8 = Professor("Copinger",  [True, True, True, True, False, True, True, True]  )
+    prof9 = Professor("Jane Doe",  [True, True, True, False, True, True, True, True]  )
     
-    testProfs = [testProf1, testProf2, testProf3, testProf4, testProf5, testProf6, testProf7, testProf8, testProf9]
-    
-    
-    testGroup1 = Group(13, "Boutell", testProfs)
-    testGroup2 = Group(18, "Coleman", testProfs)
-    testGroup3 = Group(16, "Aidoo", testProfs)
-    testGroup4 = Group(15, "Rupakheti", testProfs)
-    testGroup5 = Group(17, "DeVasher", testProfs)
-    testGroup6 = Group(16, "Song", testProfs)
-    
-    testGroups = [testGroup1, testGroup2, testGroup3, testGroup4, testGroup5, testGroup6]
+    testProfs = [prof1, prof2, prof3, prof4, prof5, prof6, prof7, prof8, prof9]
     
     
-    test = Schedule(testProfs, testGroups)
+    group1 = Group(13, "Boutell", testProfs,    [True, True, False, True, True, True, True, True]  )
+    group2 = Group(18, "Coleman", testProfs,    [True, True, True, False, True, True, True, True]  )
+    group3 = Group(16, "Aidoo", testProfs,      [True, True, True, True, False, True, True, True]  )
+    group4 = Group(15, "Rupakheti", testProfs,  [True, True, True, True, True, False, True, True]  )
+    group5 = Group(17, "DeVasher", testProfs,   [True, True, False, True, True, True, False, True] )
+    group6 = Group(16, "Song", testProfs,       [True, True, True, True, True, True, True, False]  )
+    
+    testGroups = [group1, group2, group3, group4, group5, group6]
+    
+    num_days = 8
+    num_rooms = 5
+    max_students_per_room = 30
+    
+    test = Schedule(testProfs, testGroups, num_days, num_rooms, max_students_per_room)
     test.generate_random_schedule()
+    test.score_schedule()
     
     print(test)
     
-    test.randomize_professors_day(2)
+    print(test.score_group_conflicts())
+    
+    test.replace_prof_with_random(0, "Coleman")
     
     print(test)
     
