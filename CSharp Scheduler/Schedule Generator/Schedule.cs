@@ -142,6 +142,9 @@ namespace Schedule_Generator
             
             private bool addGroups(List<Group> groupsToAdd)
             {
+
+                // blah blah just for commit test
+
                 int maxNumLectures = (int)Math.Ceiling((double)groupsToAdd.Count / (double)this.getActiveProfessorNames().Count);
 
                 //will advance professors by level and examine the lowest levels first

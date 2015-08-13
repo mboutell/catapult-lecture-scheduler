@@ -22,7 +22,9 @@ namespace Schedule_Generator
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
 
-            
+            //Adding comment just to test that I set this up properly
+
+
 
         }
 
