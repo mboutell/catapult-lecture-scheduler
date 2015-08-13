@@ -1,0 +1,12 @@
+c:\users\gibsonjc\documents\visual studio 2015\Projects\Schedule Generator\Schedule Generator\bin\Debug\Schedule Generator.exe.config
+C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\bin\Debug\Schedule Generator.exe
+C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\bin\Debug\Schedule Generator.pdb
+C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\obj\Debug\Schedule_Generator.Properties.Resources.resources
+C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\obj\Debug\Schedule Generator.csproj.GenerateResource.Cache
+C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\obj\Debug\Schedule Generator.exe
+C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\obj\Debug\Schedule Generator.pdb
+C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\obj\Debug\Schedule_Generator.Form1.resources
+C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\obj\Debug\Schedule Generator.csprojResolveAssemblyReference.cache
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\bin\Debug\Schedule Generator.exe.config
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Debug\Schedule Generator.exe
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Debug\Schedule Generator.pdb
