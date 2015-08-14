@@ -7,69 +7,46 @@ using System.Threading.Tasks;
 
 namespace Schedule_Generator
 {
-    public class Group
+    public class Group : CatapultEntity
     {
-
-        private string groupName;
+        
         private List<string> professorsSeen;
         private List<string> professorsNotSeen;
-        private int[] daysCantWatchLecture;
 
-        public Group(string groupName, string[] profNames, int[] daysCantWatchLecture)
+        public Group(string groupName) : base(groupName)
         {
-            this.groupName = groupName;
             this.professorsNotSeen = new List<string>();
             this.professorsSeen = new List<string>();
-            this.daysCantWatchLecture = daysCantWatchLecture;
-
-            foreach (string profName in profNames)
-            { // there is probably a method to do this
-                this.professorsNotSeen.Add(profName);
-            }
-
-            //foreach (string foo in this.professorsNotSeen)
-            //    System.Diagnostics.Debug.WriteLine(foo);
-
-
         }
 
-
-        public Group(string groupName, Professor[] profs, int[] daysCantWatchLecture)
-            : this(groupName, profArrToStrArr(profs), daysCantWatchLecture)
-        { }
-
-
-        // for use by the copy method
-        private Group(string groupName, List<string> profsSeen, List<string> profsNotSeen, int[] daysCantWatchLecture)
+        public void addProfessor( Professor prof)
         {
-            this.groupName = groupName;
-            this.professorsSeen = new List<string>(profsSeen);
-            this.professorsNotSeen = new List<string>(profsNotSeen);
-            this.daysCantWatchLecture = daysCantWatchLecture; // this should never change
+            this.addProfessor(prof.Name);
         }
 
-
-        // To allow an array of professors to be used in the constructor
-        private static string[] profArrToStrArr(Professor[] profs)
+        private void addProfessor(string profName)
         {
-            string[] names = new string[profs.Length];
-            for (int i = 0; i < profs.Length; i++)
-            {
-                names[i] = profs[i].getName();
-            }
-
-            return names;
+            this.professorsNotSeen.Add(profName);
         }
 
+        public void removeProfessor(Professor prof)
+        {
+            this.removeProfessor(prof.Name);
+        }
+
+        public void removeProfessor(string profName)
+        {
+            if (this.professorsNotSeen.Remove(profName))
+                return;
+            else if (this.professorsSeen.Remove(profName))
+                return;
+            else
+                throw new ArgumentException("Professor does not exist in this group");            
+        }
 
         public bool hasSeen(string profName)
         {
             return this.professorsSeen.Contains(profName);
-        }
-
-        public bool canAttendOnDay(int day)
-        {
-            return !this.daysCantWatchLecture.Contains(day);
         }
 
 
@@ -91,11 +68,9 @@ namespace Schedule_Generator
 
         public bool watchLecture(string profName, int dayNum)
         {
-            if (this.canAttendOnDay(dayNum))
-            {
-                //System.Diagnostics.Debug.WriteLine("So far so good.");
+
+            if (base.isAvailableOnDay(dayNum))
                 return this.watchLecture(profName);
-            }
 
             return false;
         }
@@ -112,20 +87,15 @@ namespace Schedule_Generator
             
         }
 
-        private Group copy()
+        public Group copy()
         {
-            List<string> profsSeenCopy = new List<string>(this.professorsSeen);
-            List<string> profsNotSeenCopy = new List<string>(this.professorsNotSeen);
+            Group groupCopy = new Group(this.Name);
 
-            //the daysCantWatchLecture array should never change so it should not need to be copied.
+            groupCopy.dailyAvailability = new List<bool>(base.dailyAvailability);
+            groupCopy.professorsSeen = new List<string>(this.professorsSeen);
+            groupCopy.professorsNotSeen = new List<string>(this.professorsNotSeen);
 
-            return new Group(this.groupName, profsSeenCopy, profsNotSeenCopy, this.daysCantWatchLecture);
-
-        }
-
-        public override string ToString()
-        {
-            return this.groupName;
+            return groupCopy;
         }
     }
 }

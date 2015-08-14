@@ -6,22 +6,13 @@ using System.Threading.Tasks;
 
 namespace Schedule_Generator
 {
-    public class Professor
+    public class Professor : CatapultEntity
     {
-        private string name;
         private int numLecturesGiven;
-        private int[] daysCantLecture;
 
-        public Professor(string name, int[] daysCantLecture)
+        public Professor(string name) : base(name)
         {
-            this.name = name;
             this.numLecturesGiven = 0;
-            this.daysCantLecture = daysCantLecture;
-        }
-
-        public string getName()
-        {
-            return this.name;
         }
 
         public int getNumLecturesGiven()
@@ -33,31 +24,31 @@ namespace Schedule_Generator
         {
             this.numLecturesGiven = 0;
         }
-        
-        public bool canLectureOnDay(int dayNum)
-        {
-            return !this.daysCantLecture.Contains(dayNum);
-        }
-
-        public void giveLecture()
-        {
-            this.numLecturesGiven++;
-        }
 
         public bool giveLecture(int dayNum)
         {
-            if (this.canLectureOnDay(dayNum))
+            if (base.isAvailableOnDay(dayNum))
             {
-                this.giveLecture();
+                this.numLecturesGiven++;
                 return true;
             }
 
             return false;
         }
 
-        public override string ToString()
+        public void unGiveLecture()
         {
-            return this.name;
+            this.numLecturesGiven--;
+            if (this.numLecturesGiven < 0)
+                throw new ArgumentOutOfRangeException("Number of lectures cannot be negative.");
+;        }
+
+        public Professor copy()
+        {
+            Professor profCopy = new Professor(this.Name);
+            profCopy.numLecturesGiven = this.numLecturesGiven;
+            profCopy.dailyAvailability = new List<bool>(base.dailyAvailability);
+            return profCopy;
         }
     }
 }

@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CatapultEntity.cs" />
+    <Compile Include="ScheduleGenerator.cs" />
     <Compile Include="Schedule.cs" />
     <Compile Include="Group.cs" />
     <Compile Include="Form1.cs">
