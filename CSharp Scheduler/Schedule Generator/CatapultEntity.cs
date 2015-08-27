@@ -8,7 +8,8 @@ namespace Schedule_Generator
 {
     public abstract class CatapultEntity
     {
-        protected List<bool> dailyAvailability;
+        // make this a dictionary of dates and bools. Demand a date when adding or removing a day
+        protected Dictionary<DateTime, bool> dailyAvailability;
 
         public string Name
         {
@@ -19,37 +20,32 @@ namespace Schedule_Generator
         public CatapultEntity(string name)
         {
             this.Name = name;
-            this.dailyAvailability = new List<bool>();
+            this.dailyAvailability = new Dictionary<DateTime, bool>();
         }
         
-        public void addDay(int dayNum, bool value)
+        public void setDate(DateTime date, bool value)
         {
-            this.dailyAvailability.Insert(dayNum, value);
+            this.dailyAvailability[date] = value;
         }
 
-        public void addDay()
+        public bool isAvailableOnDate(DateTime date)
         {
-            this.addDay(this.dailyAvailability.Count, true);
+            if (!this.dailyAvailability[date])
+            {
+                return false;
+            }
+            return true;
         }
 
-        public bool isAvailableOnDay(int dayNum)
+        public Dictionary<DateTime, bool> getAvailablility()
         {
-            return this.dailyAvailability[dayNum];
+            return this.dailyAvailability;
         }
 
-        public void setAvailabilityOnDay(int dayNum, bool value)
+        public void removeDay(DateTime date)
         {
-            if (dayNum < this.dailyAvailability.Count)
-                this.dailyAvailability[dayNum] = value;
-
-            throw new IndexOutOfRangeException(
-                String.Format("Tried to edit day index {0} but indices only go up to {1}"
-                , dayNum, this.dailyAvailability.Count - 1));
-        }
-
-        public void removeDay(int dayNum)
-        {
-            this.dailyAvailability.RemoveAt(dayNum);
+            if (!this.dailyAvailability.Remove(date))
+                throw new ArgumentException("Date does not exist in entity");
         }
 
         public override string ToString()

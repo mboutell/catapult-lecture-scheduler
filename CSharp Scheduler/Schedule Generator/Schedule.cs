@@ -8,16 +8,15 @@ namespace Schedule_Generator
 {
     public class Schedule : IComparable<Schedule>
     {
-
-        private int numberOfDays;
         private int numberOfRooms;
+        private List<DateTime> activeDates;
         private List<Day> days;
         private List<Professor> professors;
         private Dictionary<string, Professor> profsByName;
         private List<Group> groups;
         private double score;
 
-        public Schedule(List<Professor> profs, List<Group> groups, int numDays, int numRooms)
+        public Schedule(List<Professor> profs, List<Group> groups, List<DateTime> activeDates, int numRooms)
         {
             this.professors = new List<Professor>();
             foreach (Professor prof in profs)
@@ -33,13 +32,13 @@ namespace Schedule_Generator
             foreach (Professor prof in this.professors)
                 this.profsByName[prof.Name] = prof;
 
-            this.numberOfDays = numDays;
+            this.activeDates = activeDates;
             this.numberOfRooms = numRooms;
 
             this.days = new List<Day>();
-            for (int dayNum = 0; dayNum < this.numberOfDays; dayNum++)
+            foreach (DateTime date in this.activeDates)
             {
-                this.days.Add(new Day(this.numberOfRooms, dayNum));
+                this.days.Add(new Day(this.numberOfRooms, date));
             }
 
         }
@@ -59,12 +58,10 @@ namespace Schedule_Generator
 
         public bool generateRandomSchedule(Random randomGenerator)
         {
-
-
             int counter;
             bool admitDefeat = false;
 
-            for (int dayNum = 0; dayNum < this.numberOfDays; dayNum++)
+            for (int dayNum = 0; dayNum < this.activeDates.Count; dayNum++)
             {
                 if (admitDefeat)
                     break;
@@ -131,7 +128,7 @@ namespace Schedule_Generator
             double score = 0;
 
             Dictionary<string, Professor> profByName = new Dictionary<string, Professor>();
-            double goalNumLectures = (double)this.professors.Count / (double)this.numberOfDays;
+            double goalNumLectures = (double)this.professors.Count / (double)this.activeDates.Count;
             int goalNumLecturesLow = (int)goalNumLectures;
             int goalNumLecturesHigh = (int)Math.Ceiling(goalNumLectures);
 
@@ -178,23 +175,23 @@ namespace Schedule_Generator
         {
             private Dictionary<string, List<Group>> rooms;
             private Dictionary<string, Professor> profsInRooms;
-            private int dayNumber;
+            private DateTime date;
             private int numberOfRooms;
 
 
-            public Day(int numberOfRooms, int dayNum)
+            public Day(int numberOfRooms, DateTime date)
             {
                 this.numberOfRooms = numberOfRooms;
-                this.dayNumber = dayNum;
+                this.date = date;
                 this.rooms = new Dictionary<string, List<Group>>();
                 this.profsInRooms = new Dictionary<string, Professor>();
 
             }
-
+            
             private bool addProfessorToDay(Professor prof)
             {
 
-                if (prof.giveLecture(this.dayNumber))
+                if (prof.giveLecture(this.date))
                 {
                     this.profsInRooms[prof.Name] = prof;
                     this.rooms.Add(prof.Name, new List<Group>());
@@ -226,12 +223,12 @@ namespace Schedule_Generator
 
             private bool addGroupToProfessor(string profName, Group group)
             {
-                if (!group.isAvailableOnDay(this.dayNumber))
+                if (!group.isAvailableOnDate(this.date))
                     return false;
 
                 //System.Diagnostics.Debug.WriteLine("Group available.");
 
-                if (!group.watchLecture(profName, this.dayNumber))
+                if (!group.watchLecture(profName, this.date))
                     return false;
 
                 this.rooms[profName].Add(group);
@@ -350,7 +347,7 @@ namespace Schedule_Generator
 
                 foreach (Group group in groups)
                 {
-                    if (group.isAvailableOnDay(this.dayNumber))
+                    if (group.isAvailableOnDate(this.date))
                         groupsToAdd.Add(group);
                 }
                 

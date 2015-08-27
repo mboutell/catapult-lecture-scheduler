@@ -66,10 +66,10 @@ namespace Schedule_Generator
 
         }
 
-        public bool watchLecture(string profName, int dayNum)
+        public bool watchLecture(string profName, DateTime date)
         {
 
-            if (base.isAvailableOnDay(dayNum))
+            if (base.isAvailableOnDate(date))
                 return this.watchLecture(profName);
 
             return false;
@@ -91,7 +91,7 @@ namespace Schedule_Generator
         {
             Group groupCopy = new Group(this.Name);
 
-            groupCopy.dailyAvailability = new List<bool>(base.dailyAvailability);
+            groupCopy.dailyAvailability = new Dictionary<DateTime, bool>(base.dailyAvailability);
             groupCopy.professorsSeen = new List<string>(this.professorsSeen);
             groupCopy.professorsNotSeen = new List<string>(this.professorsNotSeen);
 

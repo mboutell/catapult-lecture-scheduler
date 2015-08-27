@@ -25,9 +25,9 @@ namespace Schedule_Generator
             this.numLecturesGiven = 0;
         }
 
-        public bool giveLecture(int dayNum)
+        public bool giveLecture(DateTime date)
         {
-            if (base.isAvailableOnDay(dayNum))
+            if (base.isAvailableOnDate(date))
             {
                 this.numLecturesGiven++;
                 return true;
@@ -47,7 +47,7 @@ namespace Schedule_Generator
         {
             Professor profCopy = new Professor(this.Name);
             profCopy.numLecturesGiven = this.numLecturesGiven;
-            profCopy.dailyAvailability = new List<bool>(base.dailyAvailability);
+            profCopy.dailyAvailability = new Dictionary<DateTime, bool>(base.dailyAvailability);
             return profCopy;
         }
     }

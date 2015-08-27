@@ -20,15 +20,7 @@ namespace Schedule_Generator
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
-
-
-            System.Diagnostics.Debug.WriteLine("Checking for multithreading.");
-
-            //Adding comment just to test that I set this up properly
-
-
-
+            Application.Run(new MainForm());            
         }
 
         
