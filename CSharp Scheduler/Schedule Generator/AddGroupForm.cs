@@ -17,6 +17,18 @@ namespace Schedule_Generator
 
         private void addEntityButton_Click(object sender, EventArgs e)
         {
+            if (this.isEditting)
+            {
+                this.editExistingGroup();
+            }
+            else
+            {
+                this.addNewGroup();
+            }
+        }
+
+        private void addNewGroup()
+        {
             string name = this.nameTextBox.Text;
 
             List<DateTime> dates = new List<DateTime>();
@@ -27,10 +39,16 @@ namespace Schedule_Generator
             {
                 this.scheduleGenerator.addGroup(name, dates);
             }
-            catch (ArgumentException groupNameAlreadyUsedException)
+            catch (ArgumentException repeatGroupException)
             {
-                ;
+                //Tell the user what horrid thing they have attempted
             }
+        }
+
+        private void editExistingGroup()
+        {
+            this.scheduleGenerator.removeGroup(this.nameToEdit);
+            this.addNewGroup();
         }
     }
 }

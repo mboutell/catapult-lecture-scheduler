@@ -47,7 +47,7 @@ namespace Schedule_Generator
         {
             Professor profCopy = new Professor(this.Name);
             profCopy.numLecturesGiven = this.numLecturesGiven;
-            profCopy.dailyAvailability = new Dictionary<DateTime, bool>(base.dailyAvailability);
+            profCopy.DailyAvailability = new Dictionary<DateTime, bool>(base.DailyAvailability);
             return profCopy;
         }
     }

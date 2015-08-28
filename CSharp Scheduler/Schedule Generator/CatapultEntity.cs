@@ -9,7 +9,11 @@ namespace Schedule_Generator
     public abstract class CatapultEntity
     {
         // make this a dictionary of dates and bools. Demand a date when adding or removing a day
-        protected Dictionary<DateTime, bool> dailyAvailability;
+        public Dictionary<DateTime, bool> DailyAvailability
+        {
+            get;
+            protected set;
+        }
 
         public string Name
         {
@@ -20,17 +24,17 @@ namespace Schedule_Generator
         public CatapultEntity(string name)
         {
             this.Name = name;
-            this.dailyAvailability = new Dictionary<DateTime, bool>();
+            this.DailyAvailability = new Dictionary<DateTime, bool>();
         }
         
         public void setDate(DateTime date, bool value)
         {
-            this.dailyAvailability[date] = value;
+            this.DailyAvailability[date] = value;
         }
 
         public bool isAvailableOnDate(DateTime date)
         {
-            if (!this.dailyAvailability[date])
+            if (!this.DailyAvailability[date])
             {
                 return false;
             }
@@ -39,12 +43,12 @@ namespace Schedule_Generator
 
         public Dictionary<DateTime, bool> getAvailablility()
         {
-            return this.dailyAvailability;
+            return this.DailyAvailability;
         }
 
         public void removeDay(DateTime date)
         {
-            if (!this.dailyAvailability.Remove(date))
+            if (!this.DailyAvailability.Remove(date))
                 throw new ArgumentException("Date does not exist in entity");
         }
 

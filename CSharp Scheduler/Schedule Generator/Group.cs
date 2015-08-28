@@ -91,7 +91,7 @@ namespace Schedule_Generator
         {
             Group groupCopy = new Group(this.Name);
 
-            groupCopy.dailyAvailability = new Dictionary<DateTime, bool>(base.dailyAvailability);
+            groupCopy.DailyAvailability = new Dictionary<DateTime, bool>(base.DailyAvailability);
             groupCopy.professorsSeen = new List<string>(this.professorsSeen);
             groupCopy.professorsNotSeen = new List<string>(this.professorsNotSeen);
 
