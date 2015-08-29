@@ -19,3 +19,4 @@ C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp
 C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Debug\Schedule_Generator.AddEntityForm.resources
 C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Debug\Schedule_Generator.AddGroupForm.resources
 C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Debug\Schedule_Generator.AddProfessorForm.resources
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Debug\Schedule_Generator.ScheduleDisplayForm.resources

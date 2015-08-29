@@ -6,3 +6,16 @@ C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Sched
 C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\obj\Release\Schedule Generator.csproj.GenerateResource.Cache
 C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\obj\Release\Schedule Generator.exe
 C:\Users\gibsonjc\Documents\Visual Studio 2015\Projects\Schedule Generator\Schedule Generator\obj\Release\Schedule Generator.pdb
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\bin\Release\Schedule Generator.exe.config
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Release\Schedule Generator.exe
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Release\Schedule Generator.pdb
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\bin\Release\Schedule Generator.exe
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\bin\Release\Schedule Generator.pdb
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Release\Schedule Generator.csprojResolveAssemblyReference.cache
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Release\Schedule_Generator.AddEntityForm.resources
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Release\Schedule_Generator.AddGroupForm.resources
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Release\Schedule_Generator.AddProfessorForm.resources
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Release\Schedule_Generator.MainForm.resources
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Release\Schedule_Generator.Properties.Resources.resources
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Release\Schedule_Generator.ScheduleDisplayForm.resources
+C:\Users\gibsonjc\Documents\GitHubVisualStudio\catapult-lecture-scheduler\CSharp Scheduler\Schedule Generator\obj\Release\Schedule Generator.csproj.GenerateResource.Cache

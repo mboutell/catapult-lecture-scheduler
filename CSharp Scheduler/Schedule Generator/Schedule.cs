@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -123,6 +124,48 @@ namespace Schedule_Generator
             return this.score;
         }
 
+        public void writeToTextFile()
+        {
+            // Lines to write to the file
+            List<string> lines = new List<string>();
+            string daySeparator = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+
+            foreach (Day day in this.days)
+            {
+
+                lines.Add(daySeparator);
+
+                string date = day.Date.Date.ToString();
+                lines.Add(date.Substring(0, date.Length-12)); // -12 is to remove the time
+
+                Dictionary<string, List<Group>> rooms = day.getRooms();
+
+                foreach (string profName in rooms.Keys)
+                {
+                    lines.Add(String.Format("Professor: {0}", profName));
+
+                    string groupLine = "  Group(s): ";
+
+                    foreach (Group group in rooms[profName])
+                    {
+                        groupLine += group.Name + ", ";
+                    }
+
+                    // taking off the end comma
+                    groupLine = groupLine.Substring(0, groupLine.Length - 2);
+
+                    lines.Add(groupLine);
+                }
+            }
+
+            lines.Add(daySeparator);
+
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\GeneratedSchedule.txt";
+            System.IO.File.WriteAllLines(path, lines.ToArray());
+            Process.Start(path);
+            System.Diagnostics.Debug.WriteLine("File opened.");
+        }
+
         private double scoreNumProfLectures()
         {
             double score = 0;
@@ -175,14 +218,19 @@ namespace Schedule_Generator
         {
             private Dictionary<string, List<Group>> rooms;
             private Dictionary<string, Professor> profsInRooms;
-            private DateTime date;
+
+            public DateTime Date
+            {
+                get;
+            }
+
             private int numberOfRooms;
 
 
             public Day(int numberOfRooms, DateTime date)
             {
                 this.numberOfRooms = numberOfRooms;
-                this.date = date;
+                this.Date = date;
                 this.rooms = new Dictionary<string, List<Group>>();
                 this.profsInRooms = new Dictionary<string, Professor>();
 
@@ -191,7 +239,7 @@ namespace Schedule_Generator
             private bool addProfessorToDay(Professor prof)
             {
 
-                if (prof.giveLecture(this.date))
+                if (prof.giveLecture(this.Date))
                 {
                     this.profsInRooms[prof.Name] = prof;
                     this.rooms.Add(prof.Name, new List<Group>());
@@ -223,12 +271,12 @@ namespace Schedule_Generator
 
             private bool addGroupToProfessor(string profName, Group group)
             {
-                if (!group.isAvailableOnDate(this.date))
+                if (!group.isAvailableOnDate(this.Date))
                     return false;
 
                 //System.Diagnostics.Debug.WriteLine("Group available.");
 
-                if (!group.watchLecture(profName, this.date))
+                if (!group.watchLecture(profName, this.Date))
                     return false;
 
                 this.rooms[profName].Add(group);
@@ -245,7 +293,11 @@ namespace Schedule_Generator
                 return new List<string>(this.rooms.Keys);
             }
 
-
+            public Dictionary<string, List<Group>> getRooms()
+            {
+                return this.rooms;
+            }
+            
             private void addProfsToDay(List<Professor> profs, Random randGenerator)
             {
                 // note that it is possible that there could be less profs than rooms. Should alert the user or anything?
@@ -347,7 +399,7 @@ namespace Schedule_Generator
 
                 foreach (Group group in groups)
                 {
-                    if (group.isAvailableOnDate(this.date))
+                    if (group.isAvailableOnDate(this.Date))
                         groupsToAdd.Add(group);
                 }
                 
