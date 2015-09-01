@@ -29,7 +29,7 @@ namespace Schedule_Generator
 
         private void addNewGroup()
         {
-            string name = this.nameTextBox.Text;
+            string name = this.getNameText();
 
             List<DateTime> dates = new List<DateTime>();
             foreach (DateTime date in this.datesUnavailableListBox.Items)

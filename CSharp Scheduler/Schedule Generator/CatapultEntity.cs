@@ -41,6 +41,21 @@ namespace Schedule_Generator
             return true;
         }
 
+        public List<DateTime> getDatesUnavailable()
+        {
+            List<DateTime> datesToReturn = new List<DateTime>();
+
+            foreach (DateTime date in this.DailyAvailability.Keys)
+            {
+                if (!this.DailyAvailability[date])
+                {
+                    datesToReturn.Add(date);
+                }
+            }
+
+            return datesToReturn;
+        }
+
         public Dictionary<DateTime, bool> getAvailablility()
         {
             return this.DailyAvailability;
